@@ -31,8 +31,8 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">update</property>
 
-        <mapping resource="Event.hbm.xml"/>
-        <mapping resource="Person.hbm.xml" />
+        <mapping resource="mapping/Event.hbm.xml"/>
+        <mapping resource="mapping/Person.hbm.xml" />
 
     </session-factory>
 
