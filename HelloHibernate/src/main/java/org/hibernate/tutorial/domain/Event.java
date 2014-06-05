@@ -1,6 +1,8 @@
 package org.hibernate.tutorial.domain;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by 908869 on 6/3/2014.
@@ -12,6 +14,8 @@ public class Event {
     private String title;
 
     private Date date;
+
+    private Set<Person> participants = new HashSet<Person>();
 
     public Event() {
     }
@@ -38,5 +42,13 @@ public class Event {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Set<Person> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(Set<Person> participants) {
+        this.participants = participants;
     }
 }
