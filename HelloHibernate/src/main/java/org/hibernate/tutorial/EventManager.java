@@ -2,8 +2,10 @@ package org.hibernate.tutorial;
 
 import org.hibernate.Session;
 import org.hibernate.tutorial.domain.Event;
+import org.hibernate.tutorial.domain.Person;
 import org.hibernate.tutorial.util.HibernateUtil;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +24,13 @@ public class EventManager {
             for(Event event : events) {
                 System.out.println("Event: " + event.getTitle() + " Time: " + event.getDate());
             }
+        } else if(args[0].equals("addpersontoevent")) {
+            Long eventId = (Long) mgr.createAndStoreEvent("My Event", new Date());
+            Long personId = (Long) mgr.createAndStorePerson("Foo", "Bar");
+            mgr.addPersonToEvent(personId, eventId);
+            mgr.addEmailToPerson(personId, "email1@test.com");
+            mgr.addEmailToPerson(personId, "email2@test.com");
+            System.out.println("Added person " + personId + " to event " + eventId);
         }
 
 //        HibernateUtil.getSessionFactory().close();
@@ -29,16 +38,33 @@ public class EventManager {
         HibernateUtil.close();
     }
 
-    private void createAndStoreEvent(String title, Date theDate) {
+    private Serializable createAndStoreEvent(String title, Date theDate) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
 
         Event theEvent = new Event();
         theEvent.setTitle(title);
         theEvent.setDate(theDate);
-        session.save(theEvent);
+        Serializable result = session.save(theEvent);
 
         session.getTransaction().commit();
+
+        return result;
+    }
+
+    private Serializable createAndStorePerson(String firstName, String lastName) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+
+        Person person = new Person();
+        person.setFirstName(firstName);
+        person.setLastName(lastName);
+        person.setAge(18);
+        Serializable result = session.save(person);
+
+        session.getTransaction().commit();
+
+        return result;
     }
 
     private List<Event> listEvents() {
@@ -47,5 +73,27 @@ public class EventManager {
         List<Event> result = session.createQuery("from Event").list();
         session.getTransaction().commit();
         return result;
+    }
+
+    private void addPersonToEvent(Long personId, Long eventId) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+
+        Person person = (Person) session.load(Person.class, personId);
+        Event event = (Event) session.load(Event.class, eventId);
+        person.getEvents().add(event);
+
+        session.getTransaction().commit();
+    }
+
+    private void addEmailToPerson(Long personId, String emailAddress) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session.beginTransaction();
+
+        Person aPerson = (Person) session.load(Person.class, personId);
+        // adding to the emailAddress collection might trigger a lazy load of the collection
+        aPerson.getEmailAddresses().add(emailAddress);
+
+        session.getTransaction().commit();
     }
 }
